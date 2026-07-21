@@ -16,7 +16,7 @@ function RobotImage({ fuel, className }: { fuel: number; className: string }) {
   return (
     <div className="relative inline-block">
       <Image
-        src="/robotan-front.png"
+        src="/robotan/robotan-normal.png"
         alt="Robotan"
         width={435}
         height={615}

@@ -3,27 +3,32 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import Chat from './components/Chat'
-import { INITIAL_STATE, type RobotanEffect, type RobotanMode, type RobotanState } from './lib/robotan'
+import { EMOTION_IMAGE, INITIAL_STATE, getStatus, type RobotanEffect, type RobotanMode, type RobotanState, type RobotanStatus } from './lib/robotan'
 
-function fuelLamp(v: number) {
-  if (v > 50) return { dot: 'bg-amber-500', glow: 'shadow-[0_0_10px_rgba(245,158,11,0.95)]' }
-  if (v > 25) return { dot: 'bg-amber-700', glow: 'shadow-[0_0_6px_rgba(180,100,0,0.6)]' }
-  return { dot: 'bg-red-500', glow: 'shadow-[0_0_10px_rgba(239,68,68,0.9)]' }
+type LampStyle = { dot: string; glow: string; anim: string }
+
+const STATUS_LAMP: Record<RobotanStatus, LampStyle> = {
+  ACTIVE:    { dot: 'bg-green-400',  glow: 'shadow-[0_0_10px_rgba(74,222,128,0.95)]',  anim: 'lamp-solid'      },
+  NORMAL:    { dot: 'bg-green-400',  glow: 'shadow-[0_0_8px_rgba(74,222,128,0.7)]',    anim: 'lamp-blink-slow' },
+  RECOVERY:  { dot: 'bg-orange-400', glow: 'shadow-[0_0_8px_rgba(251,146,60,0.8)]',    anim: 'lamp-blink-slow' },
+  LOW_POWER: { dot: 'bg-red-500',    glow: 'shadow-[0_0_10px_rgba(239,68,68,0.9)]',    anim: 'lamp-blink-fast' },
+  SHUTDOWN:  { dot: 'bg-stone-600',  glow: '',                                          anim: 'lamp-off'        },
 }
 
-function RobotImage({ fuel, className }: { fuel: number; className: string }) {
-  const lamp = fuelLamp(fuel)
+function RobotImage({ status, emotion, className }: { status: RobotanStatus; emotion: RobotanState['emotion']; className: string }) {
+  const lamp = STATUS_LAMP[status]
+  const src = EMOTION_IMAGE[emotion]
   return (
     <div className="relative inline-block">
       <Image
-        src="/robotan/robotan-normal.png"
+        src={src}
         alt="Robotan"
         width={435}
         height={615}
         className={className}
       />
       <span
-        className={`lamp-glow absolute w-5 h-3.5 rounded-full ${lamp.dot} ${lamp.glow} blur-[3px] pointer-events-none`}
+        className={`${lamp.anim} absolute w-5 h-3.5 rounded-full ${lamp.dot} ${lamp.glow} blur-[3px] pointer-events-none`}
         style={{ left: '36%', top: '63%', transform: 'translate(-50%, -50%)' }}
       />
     </div>
@@ -31,9 +36,9 @@ function RobotImage({ fuel, className }: { fuel: number; className: string }) {
 }
 
 const MODE_STYLE: Record<RobotanMode, string> = {
-  STANDBY: 'border-stone-200 text-stone-300',
+  STANDBY: 'border-cyan-400 text-cyan-500 bg-cyan-50',
   ACTIVE:  'border-amber-400 text-amber-500 bg-amber-50',
-  PROTECT: 'border-blue-400 text-blue-500 bg-blue-50',
+  PROTECT: 'border-red-400 text-red-500 bg-red-50',
 }
 
 function ActiveBadge({ mode }: { mode: RobotanMode }) {
@@ -53,16 +58,23 @@ function ActiveBadge({ mode }: { mode: RobotanMode }) {
   )
 }
 
+const STATUS_LABEL: Record<RobotanStatus, { text: string; color: string }> = {
+  ACTIVE:    { text: 'ACTIVE',    color: 'text-green-500'  },
+  NORMAL:    { text: 'NORMAL',    color: 'text-stone-500'  },
+  RECOVERY:  { text: 'RECOVERY',  color: 'text-orange-500' },
+  LOW_POWER: { text: 'LOW POWER', color: 'text-red-500'    },
+  SHUTDOWN:  { text: 'SHUTDOWN',  color: 'text-stone-400'  },
+}
+
 function StatusSection({ state }: { state: RobotanState }) {
-  const lamp = fuelLamp(state.fuel)
+  const lamp = STATUS_LAMP[state.status]
+  const statusLabel = STATUS_LABEL[state.status]
   return (
     <div className="space-y-3">
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-stone-400 tracking-widest">
           <span>POWER OUTPUT</span>
-          <span className="text-stone-600 font-semibold">
-            {state.power}% <span className="text-stone-400 font-normal">ONLINE</span>
-          </span>
+          <span className="text-stone-600 font-semibold">{state.power}%</span>
         </div>
         <div className="h-1.5 w-full bg-stone-100 rounded-full">
           <div className="h-full rounded-full bg-amber-500 transition-all duration-700" style={{ width: `${state.power}%` }} />
@@ -71,15 +83,20 @@ function StatusSection({ state }: { state: RobotanState }) {
 
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-stone-400 tracking-widest">
-          <span className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${lamp.dot} ${lamp.glow}`} />
-            FUEL CELL
-          </span>
+          <span>FUEL CELL</span>
           <span className="text-stone-600 font-semibold">{state.fuel}%</span>
         </div>
         <div className="h-1.5 w-full bg-stone-100 rounded-full">
           <div className="h-full rounded-full bg-stone-600 transition-all duration-700" style={{ width: `${state.fuel}%` }} />
         </div>
+      </div>
+
+      <div className="flex justify-between items-center text-xs text-stone-400 tracking-widest">
+        <span className="flex items-center gap-1.5">
+          <span className={`${lamp.anim} w-2 h-2 rounded-full ${lamp.dot} ${lamp.glow}`} />
+          STATUS
+        </span>
+        <span className={`font-semibold tracking-widest ${statusLabel.color}`}>{statusLabel.text}</span>
       </div>
 
       <div className="space-y-1">
@@ -120,9 +137,9 @@ function MissionCard({ padded }: { padded?: boolean }) {
 }
 
 const MOBILE_MODE_STYLE: Record<RobotanMode, { dot: string; label: string }> = {
-  STANDBY: { dot: 'bg-stone-400',                                               label: 'text-stone-500' },
-  ACTIVE:  { dot: 'bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.8)]',        label: 'text-stone-500' },
-  PROTECT: { dot: 'bg-blue-400 shadow-[0_0_6px_rgba(96,165,250,0.8)]',         label: 'text-blue-500'  },
+  STANDBY: { dot: 'bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)]',         label: 'text-cyan-500'  },
+  ACTIVE:  { dot: 'bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.8)]',        label: 'text-amber-500' },
+  PROTECT: { dot: 'bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.8)]',         label: 'text-red-500'   },
 }
 
 export default function Home() {
@@ -130,14 +147,21 @@ export default function Home() {
 
   function handleEffect(effect: RobotanEffect) {
     if (effect.stateDelta) {
-      setState((prev) => ({ ...prev, ...effect.stateDelta }))
+      setState((prev) => {
+        const next = { ...prev, ...effect.stateDelta }
+        // fuel が変わったら status を自動再計算
+        if (effect.stateDelta!.fuel !== undefined) {
+          next.status = getStatus(next.fuel)
+        }
+        return next
+      })
     }
   }
 
   const mobileMode = MOBILE_MODE_STYLE[state.mode]
 
   return (
-    <div className="min-h-screen bg-white font-mono flex flex-col items-center px-5 py-8 relative overflow-hidden">
+    <div className="min-h-screen lg:h-screen bg-white font-mono flex flex-col items-center px-5 py-5 relative lg:overflow-hidden">
 
       {/* HUD corner frames */}
       <div className="pointer-events-none fixed inset-0 z-0">
@@ -163,7 +187,7 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <RobotImage fuel={state.fuel} className="w-48 drop-shadow-sm" />
+          <RobotImage status={state.status} emotion={state.emotion} className="w-48 drop-shadow-sm" />
           <div className="text-center mt-1">
             <h1 className="text-3xl font-bold tracking-tight text-stone-800">ROBOTAN</h1>
             <p className="text-xs tracking-[0.25em] text-stone-400 uppercase mt-0.5">Protect the Henachoko.</p>
@@ -180,17 +204,17 @@ export default function Home() {
       </div>
 
       {/* ── Desktop / two-column layout ── */}
-      <div className="relative z-10 w-full max-w-4xl hidden lg:flex lg:items-start lg:gap-12 lg:pt-4">
+      <div className="relative z-10 w-full max-w-4xl hidden lg:flex lg:items-center lg:gap-10 lg:flex-1 lg:min-h-0">
 
         {/* left: robot standing */}
-        <div className="flex flex-col items-center gap-3 shrink-0 pt-8">
+        <div className="flex flex-col items-center gap-2 shrink-0">
           <div className="text-xs text-stone-400 tracking-widest uppercase self-start">ROBOTAN OS v0.1</div>
-          <RobotImage fuel={state.fuel} className="mt-6 w-[275px] drop-shadow-md" />
+          <RobotImage status={state.status} emotion={state.emotion} className="mt-4 w-[230px] drop-shadow-md" />
           <ActiveBadge mode={state.mode} />
         </div>
 
         {/* right: content */}
-        <div className="flex-1 space-y-6 pt-8">
+        <div className="flex-1 space-y-4">
           <div>
             <h1 className="text-5xl font-bold tracking-tight text-stone-800">ROBOTAN</h1>
             <p className="text-sm tracking-[0.3em] text-stone-400 uppercase mt-1">Protect the Henachoko.</p>

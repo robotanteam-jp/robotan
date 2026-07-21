@@ -30,6 +30,17 @@ body {
   50%       { opacity: 0.85; }
 }
 
-.lamp-glow {
-  animation: lamp-pulse 4s ease-in-out infinite;
+@keyframes lamp-blink-slow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.1; }
 }
+
+@keyframes lamp-blink-fast {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.lamp-solid      { }
+.lamp-blink-slow { animation: lamp-blink-slow 2s ease-in-out infinite; }
+.lamp-blink-fast { animation: lamp-blink-fast 0.5s ease-in-out infinite; }
+.lamp-off        { opacity: 0.15; }

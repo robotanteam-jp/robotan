@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { getRobotanEffect, type Message, type RobotanEffect, type RobotanState } from '../lib/robotan'
+import { type Message, type RobotanEffect, type RobotanEmotion, type RobotanMode, type RobotanState } from '../lib/robotan'
 
 const INITIAL_MESSAGES: Message[] = [
   {
     role: 'robot',
-    text: '🤖 起動完了でござる。\n\n今日もへなちょこを保護対象として認識したでござる。\n\n今日の状況を教えてでござる。',
+    text: '起動完了でござる。\n\n今日もへなちょこを保護対象として認識したでござる。\n\n今日の状況を教えてでござる。',
   },
 ]
 
@@ -20,12 +20,20 @@ export default function Chat({ state, onEffect }: Props) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const input = inputRef.current
+    if (input && input.offsetParent !== null) {
+      input.focus()
+    }
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  function send() {
+  async function send() {
     const text = input.trim()
     if (!text || loading) return
 
@@ -33,12 +41,34 @@ export default function Chat({ state, onEffect }: Props) {
     setMessages((prev) => [...prev, { role: 'user', text }])
     setLoading(true)
 
-    setTimeout(() => {
-      const effect = getRobotanEffect(text, state)
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),
+      })
+      const data = await res.json()
+      const replyText = res.ok
+        ? (data.reply ?? '応答を取得できなかったでござる。')
+        : (data.error ?? '通信エラーが発生したでござる。')
+      const VALID_MODES: RobotanMode[] = ['STANDBY', 'ACTIVE', 'PROTECT']
+      const mode = VALID_MODES.includes(data.mode) ? (data.mode as RobotanMode) : undefined
+      const VALID_EMOTIONS: RobotanEmotion[] = ['HAPPY', 'NORMAL', 'RELAX', 'WORRIED', 'DETERMINED', 'SLEEPY']
+      const emotion: RobotanEmotion | undefined = !res.ok
+        ? 'SLEEPY'
+        : VALID_EMOTIONS.includes(data.emotion) ? (data.emotion as RobotanEmotion) : undefined
+      const effect: RobotanEffect = {
+        reply: replyText,
+        ...((mode || emotion) && { stateDelta: { ...(mode && { mode }), ...(emotion && { emotion }) } }),
+      }
       setMessages((prev) => [...prev, { role: 'robot', text: effect.reply }])
-      setLoading(false)
       onEffect?.(effect)
-    }, 500)
+    } catch {
+      setMessages((prev) => [...prev, { role: 'robot', text: '通信エラーが発生したでござる。' }])
+    } finally {
+      setLoading(false)
+      inputRef.current?.focus()
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -47,7 +77,10 @@ export default function Chat({ state, onEffect }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm space-y-2 max-h-60 overflow-y-auto">
+      <div
+        className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm space-y-2 max-h-44 overflow-y-auto overscroll-contain"
+        onMouseDown={(e) => e.preventDefault()}
+      >
         {messages.map((m, i) => (
           <div key={i}>
             {m.role === 'user' ? (
@@ -56,7 +89,7 @@ export default function Chat({ state, onEffect }: Props) {
               </div>
             ) : (
               <div className="text-stone-700 whitespace-pre-line">
-                <span className="text-amber-500 select-none">&gt; </span>{m.text}
+                <span className="text-amber-500 select-none">🤖 </span>{m.text}
               </div>
             )}
           </div>
@@ -76,6 +109,8 @@ export default function Chat({ state, onEffect }: Props) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={loading}
+          ref={inputRef}
+          autoFocus
           placeholder="今日の状況を教えてでござる。"
           className="flex-1 rounded-full border border-stone-200 bg-stone-50 px-5 py-3 text-sm text-stone-800 placeholder-stone-400 outline-none focus:border-stone-400 focus:ring-2 focus:ring-stone-200 transition-all disabled:opacity-50"
         />

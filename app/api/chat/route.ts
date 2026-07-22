@@ -21,12 +21,21 @@ export async function POST(req: Request) {
     });
 
     const raw = response.text ?? "{}";
-    const parsed = JSON.parse(raw) as { reply?: string; mode?: string; emotion?: string };
+    const parsed = JSON.parse(raw) as {
+      reply?: string; mode?: string; emotion?: string;
+      powerChange?: number; fuelChange?: number; zipperState?: string;
+      missionCompleted?: boolean; newMission?: { title: string; tags: string[] } | null;
+    };
 
     return Response.json({
-      reply: parsed.reply ?? "応答を取得できなかったでござる。",
-      mode: parsed.mode ?? null,
-      emotion: parsed.emotion ?? null,
+      reply:            parsed.reply ?? "応答を取得できなかったでござる。",
+      mode:             parsed.mode ?? null,
+      emotion:          parsed.emotion ?? null,
+      powerChange:      typeof parsed.powerChange === 'number' ? parsed.powerChange : 0,
+      fuelChange:       typeof parsed.fuelChange  === 'number' ? parsed.fuelChange  : 0,
+      zipperState:      parsed.zipperState ?? null,
+      missionCompleted: typeof parsed.missionCompleted === 'boolean' ? parsed.missionCompleted : false,
+      newMission:       parsed.newMission ?? null,
     });
   } catch (err: unknown) {
     const body = err instanceof Error ? err.message : String(err);

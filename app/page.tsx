@@ -1,9 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Chat from './components/Chat'
-import { EMOTION_IMAGE, INITIAL_STATE, getStatus, type RobotanEffect, type RobotanMode, type RobotanState, type RobotanStatus } from './lib/robotan'
+import { EMOTION_IMAGE, INITIAL_MISSION, INITIAL_STATE, getStatus, type Mission, type RobotanEffect, type RobotanMode, type RobotanState, type RobotanStatus, type ZipperState } from './lib/robotan'
 
 type LampStyle = { dot: string; glow: string; anim: string }
 
@@ -15,7 +15,7 @@ const STATUS_LAMP: Record<RobotanStatus, LampStyle> = {
   SHUTDOWN:  { dot: 'bg-stone-600',  glow: '',                                          anim: 'lamp-off'        },
 }
 
-function RobotImage({ status, emotion, className }: { status: RobotanStatus; emotion: RobotanState['emotion']; className: string }) {
+function RobotImage({ status, emotion, className, rippleKey }: { status: RobotanStatus; emotion: RobotanState['emotion']; className: string; rippleKey: number }) {
   const lamp = STATUS_LAMP[status]
   const src = EMOTION_IMAGE[emotion]
   return (
@@ -31,6 +31,13 @@ function RobotImage({ status, emotion, className }: { status: RobotanStatus; emo
         className={`${lamp.anim} absolute w-5 h-3.5 rounded-full ${lamp.dot} ${lamp.glow} blur-[3px] pointer-events-none`}
         style={{ left: '36%', top: '63%', transform: 'translate(-50%, -50%)' }}
       />
+      {rippleKey > 0 && (
+        <span
+          key={rippleKey}
+          className={`lamp-ripple absolute w-5 h-3.5 rounded-full ${lamp.dot} blur-[3px] pointer-events-none`}
+          style={{ left: '36%', top: '63%' }}
+        />
+      )}
     </div>
   )
 }
@@ -102,12 +109,25 @@ function StatusSection({ state }: { state: RobotanState }) {
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-stone-400 tracking-widest">
           <span>FASTENER</span>
-          <span className="text-stone-500 font-semibold tracking-widest">SEALED</span>
+          <span className={`font-semibold tracking-widest transition-colors duration-1000 ${
+            state.zipperState === 'FULL_OPEN' ? 'text-amber-500' :
+            state.zipperState === 'HALF_OPEN' ? 'text-stone-400' :
+            'text-stone-500'
+          }`}>
+            {state.zipperState === 'FULL_OPEN' ? 'OPEN' : state.zipperState === 'HALF_OPEN' ? 'HALF' : 'SEALED'}
+          </span>
         </div>
         <div className="flex gap-0.5">
-          {[...Array(10)].map((_, i) => (
-            <div key={i} className="flex-1 h-1.5 bg-stone-800 rounded-sm" />
-          ))}
+          {[...Array(10)].map((_, i) => {
+            const openCount = state.zipperState === 'FULL_OPEN' ? 10 : state.zipperState === 'HALF_OPEN' ? 5 : 0
+            const isOpen = i >= (10 - openCount)
+            return (
+              <div
+                key={i}
+                className={`flex-1 h-1.5 rounded-sm transition-all duration-1000 ${isOpen ? 'bg-stone-200' : 'bg-stone-800'}`}
+              />
+            )
+          })}
         </div>
       </div>
 
@@ -119,16 +139,17 @@ function StatusSection({ state }: { state: RobotanState }) {
   )
 }
 
-function MissionCard({ padded }: { padded?: boolean }) {
+function MissionCard({ mission, missionCompleteFlash, padded }: { mission: Mission; missionCompleteFlash: boolean; padded?: boolean }) {
   return (
-    <div className={`rounded-xl border border-stone-200 bg-stone-50 space-y-2 ${padded ? 'p-5' : 'p-4'}`}>
+    <div className={`rounded-xl border border-stone-200 bg-stone-50 space-y-1.5 ${padded ? 'p-3' : 'p-4'}`}>
       <p className="text-xs text-stone-400 tracking-widest uppercase">MISSION</p>
-      <p className="text-sm text-stone-700 leading-relaxed">
-        あなたは今日も内側にいてください。<br />
-        外のことは全部、私が引き受けます。
-      </p>
+      {missionCompleteFlash ? (
+        <p className="text-sm font-bold tracking-widest text-amber-500">MISSION COMPLETE</p>
+      ) : (
+        <p className="text-sm text-stone-700 leading-relaxed">{mission.title}</p>
+      )}
       <div className="flex gap-1.5 flex-wrap pt-1">
-        {['防御: ON', '共感: ON', '焦り吸収: ON'].map((t) => (
+        {mission.tags.map((t) => (
           <span key={t} className="text-xs px-2.5 py-0.5 rounded-full bg-stone-200/70 text-stone-500">{t}</span>
         ))}
       </div>
@@ -144,24 +165,83 @@ const MOBILE_MODE_STYLE: Record<RobotanMode, { dot: string; label: string }> = {
 
 export default function Home() {
   const [state, setState] = useState<RobotanState>(INITIAL_STATE)
+  const [displayEmotion, setDisplayEmotion] = useState<RobotanState['emotion']>(INITIAL_STATE.emotion)
+  const [mission, setMission] = useState<Mission>(INITIAL_MISSION)
+  const [missionCompleteFlash, setMissionCompleteFlash] = useState(false)
+  const [rippleKey, setRippleKey] = useState(0)
+  const stateRef = useRef(state)
+  stateRef.current = state
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (stateRef.current.emotion === 'NORMAL') {
+        setDisplayEmotion('BLINK')
+        setTimeout(() => setDisplayEmotion('NORMAL'), 2000)
+      }
+    }, 20000)
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    if (state.emotion !== 'NORMAL') {
+      setDisplayEmotion(state.emotion)
+    } else {
+      setDisplayEmotion('NORMAL')
+    }
+  }, [state.emotion])
 
   function handleEffect(effect: RobotanEffect) {
-    if (effect.stateDelta) {
-      setState((prev) => {
-        const next = { ...prev, ...effect.stateDelta }
-        // fuel が変わったら status を自動再計算
-        if (effect.stateDelta!.fuel !== undefined) {
-          next.status = getStatus(next.fuel)
-        }
-        return next
-      })
+    setState((prev) => {
+      const next = { ...prev, ...effect.stateDelta }
+
+      // Power / Fuel デルタ適用（0〜100 クランプ）
+      if (effect.powerChange) {
+        next.power = Math.min(100, Math.max(0, prev.power + effect.powerChange))
+      }
+      if (effect.fuelChange) {
+        next.fuel = Math.min(100, Math.max(0, prev.fuel + effect.fuelChange))
+      }
+
+      // fuel / power が変わったら status を再計算
+      if (effect.stateDelta?.fuel !== undefined || effect.fuelChange || effect.powerChange) {
+        next.status = getStatus(next.power, next.fuel)
+      }
+
+      // zipperState 更新
+      if (effect.zipperState) {
+        next.zipperState = effect.zipperState
+      }
+
+      // 顔が DETERMINED → mode を PROTECT に同期
+      if (next.emotion === 'DETERMINED') {
+        next.mode = 'PROTECT'
+      }
+      // mode が ACTIVE → 顔が DETERMINED のままなら NORMAL に戻す
+      if (next.mode === 'ACTIVE' && next.emotion === 'DETERMINED') {
+        next.emotion = 'NORMAL'
+      }
+
+      return next
+    })
+
+    // Mission Complete 演出
+    if (effect.missionCompleted && effect.newMission) {
+      setMissionCompleteFlash(true)
+      setRippleKey((k) => k + 1)
+      const next = effect.newMission
+      setTimeout(() => {
+        setMissionCompleteFlash(false)
+        setMission({ ...next, completed: false })
+      }, 1500)
+    } else if (!effect.missionCompleted && effect.newMission) {
+      setMission({ ...effect.newMission, completed: false })
     }
   }
 
   const mobileMode = MOBILE_MODE_STYLE[state.mode]
 
   return (
-    <div className="min-h-screen lg:h-screen bg-white font-mono flex flex-col items-center px-5 py-5 relative lg:overflow-hidden">
+    <div className="min-h-screen bg-white font-mono flex flex-col items-center px-5 py-5 relative">
 
       {/* HUD corner frames */}
       <div className="pointer-events-none fixed inset-0 z-0">
@@ -187,16 +267,16 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <RobotImage status={state.status} emotion={state.emotion} className="w-48 drop-shadow-sm" />
+          <RobotImage status={state.status} emotion={displayEmotion} className="w-48 drop-shadow-sm" rippleKey={rippleKey} />
           <div className="text-center mt-1">
             <h1 className="text-3xl font-bold tracking-tight text-stone-800">ROBOTAN</h1>
             <p className="text-xs tracking-[0.25em] text-stone-400 uppercase mt-0.5">Protect the Henachoko.</p>
           </div>
         </div>
 
-        <MissionCard />
+        <MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} />
         <StatusSection state={state} />
-        <Chat state={state} onEffect={handleEffect} />
+        <Chat state={state} onEffect={handleEffect} inputLocked={missionCompleteFlash} />
 
         <p className="text-center text-xs text-stone-300 tracking-widest pb-2">
           Robotan v0.1 — Powered by Henachoko Spirit
@@ -204,25 +284,27 @@ export default function Home() {
       </div>
 
       {/* ── Desktop / two-column layout ── */}
-      <div className="relative z-10 w-full max-w-4xl hidden lg:flex lg:items-center lg:gap-10 lg:flex-1 lg:min-h-0">
+      <div className="relative z-10 w-full max-w-4xl hidden lg:flex lg:items-start lg:gap-10 lg:py-6">
 
-        {/* left: robot standing */}
-        <div className="flex flex-col items-center gap-2 shrink-0">
+        {/* left: robot + status */}
+        <div className="flex flex-col items-center gap-2 shrink-0 w-[230px]">
           <div className="text-xs text-stone-400 tracking-widest uppercase self-start">ROBOTAN OS v0.1</div>
-          <RobotImage status={state.status} emotion={state.emotion} className="mt-4 w-[230px] drop-shadow-md" />
+          <RobotImage status={state.status} emotion={displayEmotion} className="mt-2 w-[230px] drop-shadow-md" rippleKey={rippleKey} />
           <ActiveBadge mode={state.mode} />
+          <div className="w-full mt-2">
+            <StatusSection state={state} />
+          </div>
         </div>
 
-        {/* right: content */}
-        <div className="flex-1 space-y-4">
+        {/* right: title + mission + chat */}
+        <div className="flex-1 flex flex-col gap-3">
           <div>
             <h1 className="text-5xl font-bold tracking-tight text-stone-800">ROBOTAN</h1>
             <p className="text-sm tracking-[0.3em] text-stone-400 uppercase mt-1">Protect the Henachoko.</p>
           </div>
 
-          <MissionCard padded />
-          <StatusSection state={state} />
-          <Chat state={state} onEffect={handleEffect} />
+          <MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} padded />
+          <Chat state={state} onEffect={handleEffect} logClassName="max-h-72" inputLocked={missionCompleteFlash} />
 
           <p className="text-xs text-stone-300 tracking-widest">
             Robotan v0.1 — Powered by Henachoko Spirit

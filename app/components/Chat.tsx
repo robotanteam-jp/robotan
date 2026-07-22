@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { type Message, type RobotanEffect, type RobotanEmotion, type RobotanMode, type RobotanState } from '../lib/robotan'
+import { type Message, type RobotanEffect, type RobotanEmotion, type RobotanMode, type RobotanState, type ZipperState } from '../lib/robotan'
 
 const INITIAL_MESSAGES: Message[] = [
   {
@@ -13,9 +13,11 @@ const INITIAL_MESSAGES: Message[] = [
 type Props = {
   state: RobotanState
   onEffect?: (effect: RobotanEffect) => void
+  logClassName?: string
+  inputLocked?: boolean
 }
 
-export default function Chat({ state, onEffect }: Props) {
+export default function Chat({ state, onEffect, logClassName, inputLocked }: Props) {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -35,7 +37,7 @@ export default function Chat({ state, onEffect }: Props) {
 
   async function send() {
     const text = input.trim()
-    if (!text || loading) return
+    if (!text || loading || inputLocked) return
 
     setInput('')
     setMessages((prev) => [...prev, { role: 'user', text }])
@@ -57,9 +59,16 @@ export default function Chat({ state, onEffect }: Props) {
       const emotion: RobotanEmotion | undefined = !res.ok
         ? 'SLEEPY'
         : VALID_EMOTIONS.includes(data.emotion) ? (data.emotion as RobotanEmotion) : undefined
+      const VALID_ZIPPER: ZipperState[] = ['CLOSED', 'HALF_OPEN', 'FULL_OPEN']
+      const zipperState: ZipperState | undefined = VALID_ZIPPER.includes(data.zipperState) ? data.zipperState : undefined
       const effect: RobotanEffect = {
         reply: replyText,
         ...((mode || emotion) && { stateDelta: { ...(mode && { mode }), ...(emotion && { emotion }) } }),
+        ...(typeof data.powerChange === 'number' && { powerChange: data.powerChange }),
+        ...(typeof data.fuelChange  === 'number' && { fuelChange:  data.fuelChange  }),
+        ...(zipperState && { zipperState }),
+        missionCompleted: data.missionCompleted === true,
+        ...(data.newMission && { newMission: data.newMission }),
       }
       setMessages((prev) => [...prev, { role: 'robot', text: effect.reply }])
       onEffect?.(effect)
@@ -78,8 +87,7 @@ export default function Chat({ state, onEffect }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div
-        className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm space-y-2 max-h-44 overflow-y-auto overscroll-contain"
-        onMouseDown={(e) => e.preventDefault()}
+        className={`rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm space-y-2 overflow-y-auto overscroll-contain ${logClassName ?? 'max-h-44'}`}
       >
         {messages.map((m, i) => (
           <div key={i}>
@@ -89,7 +97,7 @@ export default function Chat({ state, onEffect }: Props) {
               </div>
             ) : (
               <div className="text-stone-700 whitespace-pre-line">
-                <span className="text-amber-500 select-none">🤖 </span>{m.text}
+                <span className="text-amber-500 select-none">🤖 </span>{m.text.replace(/^🤖\s*/, '')}
               </div>
             )}
           </div>
@@ -108,7 +116,7 @@ export default function Chat({ state, onEffect }: Props) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={loading}
+          disabled={loading || !!inputLocked}
           ref={inputRef}
           autoFocus
           placeholder="今日の状況を教えてでござる。"
@@ -117,7 +125,7 @@ export default function Chat({ state, onEffect }: Props) {
         <button
           type="button"
           onClick={send}
-          disabled={!input.trim() || loading}
+          disabled={!input.trim() || loading || !!inputLocked}
           className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-800 text-white transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="送信"
         >

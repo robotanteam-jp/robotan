@@ -15,17 +15,28 @@ const STATUS_LAMP: Record<RobotanStatus, LampStyle> = {
   SHUTDOWN:  { dot: 'bg-stone-600',  glow: '',                                          anim: 'lamp-off'        },
 }
 
-function RobotImage({ status, emotion, className, rippleKey }: { status: RobotanStatus; emotion: RobotanState['emotion']; className: string; rippleKey: number }) {
+const BACK_IMAGE: Record<ZipperState, string> = {
+  CLOSED:    '/robotan/robotan-back.png',
+  HALF_OPEN: '/robotan/robotan-back-halfopen.png',
+  FULL_OPEN: '/robotan/robotan-back-fullopen.png',
+}
+
+function RobotImage({ status, emotion, zipperState, className, rippleKey }: { status: RobotanStatus; emotion: RobotanState['emotion']; zipperState: ZipperState; className: string; rippleKey: number }) {
+  const [hovered, setHovered] = useState(false)
   const lamp = STATUS_LAMP[status]
-  const src = EMOTION_IMAGE[emotion]
+  const src = hovered ? BACK_IMAGE[zipperState] : EMOTION_IMAGE[emotion]
   return (
-    <div className="relative inline-block">
+    <div
+      className="relative inline-block cursor-pointer"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <Image
         src={src}
         alt="Robotan"
         width={435}
         height={615}
-        className={className}
+        className={`transition-opacity duration-300 ${className}`}
       />
       <span
         className={`${lamp.anim} absolute w-5 h-3.5 rounded-full ${lamp.dot} ${lamp.glow} blur-[3px] pointer-events-none`}
@@ -267,10 +278,11 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <RobotImage status={state.status} emotion={displayEmotion} className="w-48 drop-shadow-sm" rippleKey={rippleKey} />
+          <RobotImage status={state.status} emotion={displayEmotion} zipperState={state.zipperState} className="w-48 drop-shadow-sm" rippleKey={rippleKey} />
           <div className="text-center mt-1">
             <h1 className="text-3xl font-bold tracking-tight text-stone-800">ROBOTAN</h1>
             <p className="text-xs tracking-[0.25em] text-stone-400 uppercase mt-0.5">Protect the Henachoko.</p>
+            <p className="text-xs text-stone-400 mt-2 leading-relaxed">あなたは今日も内側にいてください。<br />外のことは全部、私が引き受けます。</p>
           </div>
         </div>
 
@@ -289,7 +301,7 @@ export default function Home() {
         {/* left: robot + status */}
         <div className="flex flex-col items-center gap-2 shrink-0 w-[230px]">
           <div className="text-xs text-stone-400 tracking-widest uppercase self-start">ROBOTAN OS v0.1</div>
-          <RobotImage status={state.status} emotion={displayEmotion} className="mt-2 w-[230px] drop-shadow-md" rippleKey={rippleKey} />
+          <RobotImage status={state.status} emotion={displayEmotion} zipperState={state.zipperState} className="mt-2 w-[230px] drop-shadow-md" rippleKey={rippleKey} />
           <ActiveBadge mode={state.mode} />
           <div className="w-full mt-2">
             <StatusSection state={state} />
@@ -301,6 +313,7 @@ export default function Home() {
           <div>
             <h1 className="text-5xl font-bold tracking-tight text-stone-800">ROBOTAN</h1>
             <p className="text-sm tracking-[0.3em] text-stone-400 uppercase mt-1">Protect the Henachoko.</p>
+            <p className="text-xs text-stone-400 mt-2 leading-relaxed">あなたは今日も内側にいてください。<br />外のことは全部、私が引き受けます。</p>
           </div>
 
           <MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} padded />

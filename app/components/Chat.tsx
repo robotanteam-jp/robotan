@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { type Message, type RobotanEffect, type RobotanEmotion, type RobotanMode, type RobotanState, type ZipperState } from '../lib/robotan'
+import { type Message, type RobotanEffect, type RobotanEmotion, type RobotanMode, type RobotanState, type RobotanStatus, type ZipperState } from '../lib/robotan'
 
 const INITIAL_MESSAGES: Message[] = [
   {
@@ -47,12 +47,18 @@ export default function Chat({ state, onEffect, logClassName, inputLocked }: Pro
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({
+          message: text,
+          context: { status: state.status, lowPowerLock: state.lowPowerLock },
+        }),
       })
       const data = await res.json()
       const replyText = res.ok
         ? (data.reply ?? '応答を取得できなかったでござる。')
         : (data.error ?? '通信エラーが発生したでござる。')
+      const VALID_STATUSES: RobotanStatus[] = ['ACTIVE', 'NORMAL', 'RECOVERY', 'LOW_POWER', 'SHUTDOWN']
+      const status: RobotanStatus | undefined = VALID_STATUSES.includes(data.status) ? (data.status as RobotanStatus) : undefined
+      const lowPowerLock: boolean | undefined = typeof data.lowPowerLock === 'boolean' ? data.lowPowerLock : undefined
       const VALID_MODES: RobotanMode[] = ['STANDBY', 'ACTIVE', 'PROTECT']
       const mode = VALID_MODES.includes(data.mode) ? (data.mode as RobotanMode) : undefined
       const VALID_EMOTIONS: RobotanEmotion[] = ['HAPPY', 'NORMAL', 'RELAX', 'WORRIED', 'DETERMINED', 'SLEEPY']
@@ -60,20 +66,26 @@ export default function Chat({ state, onEffect, logClassName, inputLocked }: Pro
         ? 'SLEEPY'
         : VALID_EMOTIONS.includes(data.emotion) ? (data.emotion as RobotanEmotion) : undefined
       const VALID_ZIPPER: ZipperState[] = ['CLOSED', 'HALF_OPEN', 'FULL_OPEN']
-      const zipperState: ZipperState | undefined = VALID_ZIPPER.includes(data.zipperState) ? data.zipperState : undefined
+      const zipperState: ZipperState = !res.ok
+        ? 'CLOSED'
+        : VALID_ZIPPER.includes(data.zipperState) ? data.zipperState : (state.zipperState ?? 'CLOSED')
       const effect: RobotanEffect = {
         reply: replyText,
+        ...(status && { status }),
+        ...(lowPowerLock !== undefined && { lowPowerLock }),
         ...((mode || emotion) && { stateDelta: { ...(mode && { mode }), ...(emotion && { emotion }) } }),
         ...(typeof data.powerChange === 'number' && { powerChange: data.powerChange }),
         ...(typeof data.fuelChange  === 'number' && { fuelChange:  data.fuelChange  }),
-        ...(zipperState && { zipperState }),
+        zipperState,
         missionCompleted: data.missionCompleted === true,
         ...(data.newMission && { newMission: data.newMission }),
       }
       setMessages((prev) => [...prev, { role: 'robot', text: effect.reply }])
       onEffect?.(effect)
     } catch {
-      setMessages((prev) => [...prev, { role: 'robot', text: '通信エラーが発生したでござる。' }])
+      const errorText = '通信エラーが発生したでござる。'
+      setMessages((prev) => [...prev, { role: 'robot', text: errorText }])
+      onEffect?.({ reply: errorText, zipperState: 'CLOSED' })
     } finally {
       setLoading(false)
       inputRef.current?.focus()

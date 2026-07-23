@@ -39,6 +39,7 @@ export type RobotanState = {
   power: number
   fuel: number
   status: RobotanStatus
+  lowPowerLock: boolean
   mode: RobotanMode
   emotion: RobotanEmotion
   zipperState: ZipperState
@@ -46,6 +47,8 @@ export type RobotanState = {
 
 export type RobotanEffect = {
   reply: string
+  status?: RobotanStatus
+  lowPowerLock?: boolean
   stateDelta?: Partial<RobotanState>
   powerChange?: number
   fuelChange?: number
@@ -66,6 +69,7 @@ export const INITIAL_STATE: RobotanState = {
   power: INITIAL_POWER,
   fuel: INITIAL_FUEL,
   status: getStatus(INITIAL_POWER, INITIAL_FUEL),
+  lowPowerLock: false,
   mode: 'STANDBY',
   emotion: 'NORMAL',
   zipperState: 'CLOSED',

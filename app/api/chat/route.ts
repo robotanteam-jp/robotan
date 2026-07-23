@@ -6,9 +6,13 @@ const ai = new GoogleGenAI({
 });
 
 export async function POST(req: Request) {
-  const { message } = await req.json();
+  const { message, context } = await req.json();
 
-  const systemPrompt = await buildSystemPrompt();
+  const basePrompt = await buildSystemPrompt();
+  const stateContext = context
+    ? `\n\n## 現在の状態（参照用）\n- status: ${context.status}\n- lowPowerLock: ${context.lowPowerLock}`
+    : ''
+  const systemPrompt = basePrompt + stateContext;
 
   try {
     const response = await ai.models.generateContent({
@@ -22,13 +26,15 @@ export async function POST(req: Request) {
 
     const raw = response.text ?? "{}";
     const parsed = JSON.parse(raw) as {
-      reply?: string; mode?: string; emotion?: string;
+      reply?: string; status?: string; lowPowerLock?: boolean; mode?: string; emotion?: string;
       powerChange?: number; fuelChange?: number; zipperState?: string;
       missionCompleted?: boolean; newMission?: { title: string; tags: string[] } | null;
     };
 
     return Response.json({
       reply:            parsed.reply ?? "応答を取得できなかったでござる。",
+      status:           parsed.status ?? null,
+      lowPowerLock:     typeof parsed.lowPowerLock === 'boolean' ? parsed.lowPowerLock : null,
       mode:             parsed.mode ?? null,
       emotion:          parsed.emotion ?? null,
       powerChange:      typeof parsed.powerChange === 'number' ? parsed.powerChange : 0,

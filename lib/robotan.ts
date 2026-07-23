@@ -7,6 +7,8 @@ const MODE_INSTRUCTION = `
 Respond ONLY with a JSON object in this exact format:
 {
   "reply": "<ロボタンの返答。語尾は「〜でござる。」>",
+  "status": "<ACTIVE | NORMAL | RECOVERY | LOW_POWER | SHUTDOWN>",
+  "lowPowerLock": <重要な安全シグナルを受信した場合は true。AIが十分な回復を確認した時のみ false に戻す>,
   "mode": "<STANDBY | ACTIVE | PROTECT>",
   "emotion": "<HAPPY | NORMAL | RELAX | WORRIED | DETERMINED | SLEEPY>",
   "powerChange": <整数。変化なしは 0>,
@@ -15,12 +17,6 @@ Respond ONLY with a JSON object in this exact format:
   "missionCompleted": <現在のMissionが完了したなら true, それ以外は false>,
   "newMission": <{ "title": "...", "tags": ["...", "...", "..."] } または null>
 }
-
-## Mode Rules
-
-- STANDBY : 待機中・雑談・ユーザー待ち・起動直後
-- ACTIVE  : へなちょこがMissionを実行中（作業・開発・買い物・掃除など）
-- PROTECT : へなちょこの状態が悪い（疲れ・不安・体調不良・「消えたい」など）
 `.trim();
 
 async function readPromptFile(filename: string): Promise<string | null> {
@@ -40,6 +36,7 @@ const SPEC_FILES = [
   "MISSION.md",
   "EXPRESSION.md",
   "ZIPPER.md",
+  "MODE.md",
   "examples.md",
 ];
 

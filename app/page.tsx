@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import Chat from './components/Chat'
-import { EMOTION_IMAGE, INITIAL_MISSION, INITIAL_STATE, getStatus, type Mission, type RobotanEffect, type RobotanMode, type RobotanState, type RobotanStatus, type ZipperState } from './lib/robotan'
+import { EMOTION_IMAGE, INITIAL_MISSION, INITIAL_STATE, type Mission, type RobotanEffect, type RobotanMode, type RobotanState, type RobotanStatus, type ZipperState } from './lib/robotan'
 
 type LampStyle = { dot: string; glow: string; anim: string }
 
@@ -17,26 +17,49 @@ const STATUS_LAMP: Record<RobotanStatus, LampStyle> = {
 
 const BACK_IMAGE: Record<ZipperState, string> = {
   CLOSED:    '/robotan/robotan-back.png',
-  HALF_OPEN: '/robotan/robotan-back-halfopen.png',
-  FULL_OPEN: '/robotan/robotan-back-fullopen.png',
+  HALF_OPEN: '/robotan/robotan-back-half-open.png',
+  FULL_OPEN: '/robotan/robotan-back-full-open.png',
 }
 
 function RobotImage({ status, emotion, zipperState, className, rippleKey }: { status: RobotanStatus; emotion: RobotanState['emotion']; zipperState: ZipperState; className: string; rippleKey: number }) {
-  const [hovered, setHovered] = useState(false)
+  const [showBack, setShowBack] = useState(false)
+  const autoReturnTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lamp = STATUS_LAMP[status]
-  const src = hovered ? BACK_IMAGE[zipperState] : EMOTION_IMAGE[emotion]
+
+  useEffect(() => {
+    return () => { if (autoReturnTimer.current) clearTimeout(autoReturnTimer.current) }
+  }, [])
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault()
+    const next = !showBack
+    setShowBack(next)
+    if (autoReturnTimer.current) clearTimeout(autoReturnTimer.current)
+    if (next) {
+      autoReturnTimer.current = setTimeout(() => setShowBack(false), 30000)
+    }
+  }
+
   return (
     <div
       className="relative inline-block cursor-pointer"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => setShowBack(true)}
+      onMouseLeave={() => setShowBack(false)}
+      onTouchStart={handleTouchStart}
     >
       <Image
-        src={src}
+        src={EMOTION_IMAGE[emotion]}
         alt="Robotan"
         width={435}
         height={615}
-        className={`transition-opacity duration-300 ${className}`}
+        className={`transition-opacity duration-300 ${showBack ? 'opacity-0' : 'opacity-100'} ${className}`}
+      />
+      <Image
+        src={BACK_IMAGE[zipperState]}
+        alt="Robotan back"
+        width={435}
+        height={615}
+        className={`absolute top-0 left-0 transition-opacity duration-300 ${showBack ? 'opacity-100' : 'opacity-0'} ${className}`}
       />
       <span
         className={`${lamp.anim} absolute w-5 h-3.5 rounded-full ${lamp.dot} ${lamp.glow} blur-[3px] pointer-events-none`}
@@ -213,9 +236,14 @@ export default function Home() {
         next.fuel = Math.min(100, Math.max(0, prev.fuel + effect.fuelChange))
       }
 
-      // fuel / power が変わったら status を再計算
-      if (effect.stateDelta?.fuel !== undefined || effect.fuelChange || effect.powerChange) {
-        next.status = getStatus(next.power, next.fuel)
+      // lowPowerLock を更新
+      if (effect.lowPowerLock !== undefined) {
+        next.lowPowerLock = effect.lowPowerLock
+      }
+
+      // AI判定のstatusを反映（ロック中はLOW_POWERを強制）
+      if (effect.status) {
+        next.status = next.lowPowerLock ? 'LOW_POWER' : effect.status
       }
 
       // zipperState 更新

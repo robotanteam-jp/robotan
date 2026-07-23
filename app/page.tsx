@@ -50,16 +50,16 @@ function RobotImage({ status, emotion, zipperState, className, rippleKey }: { st
       <Image
         src={EMOTION_IMAGE[emotion]}
         alt="Robotan"
-        width={435}
-        height={615}
-        className={`transition-opacity duration-300 ${showBack ? 'opacity-0' : 'opacity-100'} ${className}`}
+        width={350}
+        height={450}
+        className={`object-contain object-center transition-opacity duration-300 ${showBack ? 'opacity-0' : 'opacity-100'} ${className}`}
       />
       <Image
         src={BACK_IMAGE[zipperState]}
         alt="Robotan back"
-        width={435}
-        height={615}
-        className={`absolute top-0 left-0 transition-opacity duration-300 ${showBack ? 'opacity-100' : 'opacity-0'} ${className}`}
+        width={350}
+        height={450}
+        className={`absolute top-0 left-0 object-contain object-center transition-opacity duration-300 ${showBack ? 'opacity-100' : 'opacity-0'} ${className}`}
       />
       <span
         className={`${lamp.anim} absolute w-5 h-3.5 rounded-full ${lamp.dot} ${lamp.glow} blur-[3px] pointer-events-none`}

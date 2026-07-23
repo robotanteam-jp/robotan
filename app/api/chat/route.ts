@@ -1,12 +1,27 @@
 import { GoogleGenAI } from "@google/genai";
 import { buildSystemPrompt } from "@/lib/robotan";
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY!,
-});
+const MOCK_RESPONSE = {
+  reply: "受信したでござる。現在デモモードで稼働中でござる。",
+  status: "NORMAL",
+  lowPowerLock: false,
+  mode: "STANDBY",
+  emotion: "NORMAL",
+  powerChange: 0,
+  fuelChange: 0,
+  zipperState: "CLOSED",
+  missionCompleted: false,
+  newMission: null,
+};
 
 export async function POST(req: Request) {
   const { message, context } = await req.json();
+
+  if (!process.env.GEMINI_API_KEY) {
+    return Response.json(MOCK_RESPONSE);
+  }
+
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
   const basePrompt = await buildSystemPrompt();
   const stateContext = context

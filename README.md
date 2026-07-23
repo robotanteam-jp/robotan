@@ -207,6 +207,7 @@ From this day, Robotan became a real AI companion.
 
 Robotan was deployed to Vercel and became available on the public web.
 From this day, anyone could meet Robotan through a browser.
+
 ---
 
 # 💙 Philosophy

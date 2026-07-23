@@ -202,6 +202,11 @@ robotan/
 Robotan is no longer a mock chat.
 From this day, Robotan became a real AI companion.
 
+### 2026-07-23
+🌍 Robotan took its first step into the world.
+
+Robotan was deployed to Vercel and became available on the public web.
+From this day, anyone could meet Robotan through a browser.
 ---
 
 # 💙 Philosophy

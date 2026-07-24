@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/chat": ["*.md"],
   },
-  // allowedDevOrigins: ['192.168.68.65'],
+  ...(process.env.DEV_LAN_IP ? { allowedDevOrigins: [process.env.DEV_LAN_IP] } : {}),
 };
 
 export default nextConfig;

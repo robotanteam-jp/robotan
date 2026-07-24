@@ -36,6 +36,12 @@ export default function Chat({ state, mission, onEffect, logClassName, inputLock
   }, [])
 
   useEffect(() => {
+    if (!loading && !inputLocked) {
+      inputRef.current?.focus()
+    }
+  }, [loading, inputLocked])
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
@@ -94,7 +100,6 @@ export default function Chat({ state, mission, onEffect, logClassName, inputLock
       onEffect?.({ reply: errorText, zipperState: 'CLOSED' })
     } finally {
       setLoading(false)
-      inputRef.current?.focus()
     }
   }
 

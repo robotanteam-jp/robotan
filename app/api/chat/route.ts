@@ -42,8 +42,6 @@ export async function POST(req: Request) {
     { role: 'user' as const, parts: [{ text: message }] },
   ]
 
-  console.log('[Gemini] contents:', JSON.stringify(contents, null, 2))
-
   try {
     const response = await ai.models.generateContent({
       model: "gemini-flash-latest",

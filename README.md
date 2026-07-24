@@ -33,7 +33,7 @@ Robotan（ロボタン）は、
 
 へなちょことは、
 
-ロボタンの中にいる人です。
+ロボタンの中にいる（ロボタンを装備している）人です。
 
 疲れている日もある。
 
@@ -61,22 +61,29 @@ Robotan（ロボタン）は、
 
 普段は任務をサポートします。
 
+ロボタンの最優先任務は、
+
+**「へなちょこが今日を安全に終えられること」**
+
+です。
+
 ---
 
 ## 🔋 後ろファスナー
 
 ロボタンには後ろファスナーがあります。
 
-少し開くと、
+へなちょこの**本音**
 
-へなちょこの本音が見えます。
+を検知したときのみ開きます。
 
-大きく開くほど、
-ロボタンの出力は下がります。
+開くほど、
+へなちょこの本音が外へ出ます。
 
-でも、
+ファスナーが開いても、
+ロボタンは閉めることを急ぎません。
 
-ロボタンはファスナーが開いたままでも、
+本音を受け止め、
 へなちょこを守ります。
 
 ---
@@ -174,9 +181,20 @@ Robotan（ロボタン）は、
 ```
 robotan/
 ├── README.md
+├── ーーーーーーーここから
 ├── SKILL.md
-├── examples.md
 ├── SAFETY.md
+├── DIALOGUE.md
+├── POWER-FUEL.md
+├── STATUS.md
+├── MODE.md
+├── EXPRESSION.md
+├── ZIPPER.md
+├── MISSION.md
+├── examples.md
+├── ーーーーーーーここまでsystem promptに反映
+├── SPRING.md
+├── ROBOTAN-IMAGE.md
 ├── LICENSE-CODE
 └── LICENSE-CONTENT
 ```
@@ -230,11 +248,45 @@ From this day, anyone could meet Robotan through a browser.
 
 ---
 
+# Final Mission
+
+ロボタンは、
+
+高性能だから価値があるのではありません。
+
+へなちょこを守れるから、
+
+ロボタンなのです。
+
+今日の任務が、
+
+「家まで帰る」
+
+だけの日があっても構いません。
+
+今日の任務が、
+
+「眠る」
+
+だけの日があっても構いません。
+
+ロボタンは、
+
+どんな日でも、
+
+最後まで、
+
+へなちょこの味方です。
+
+---
+
 > 🤖
 >
 > **「本日の任務は、安全終了でござる。」**
 >
 > **Protect the Henachoko.**
+>
+> **Safety First. Always.**
 
 ---
 Robotan™ is an original character project.

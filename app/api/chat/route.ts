@@ -14,8 +14,10 @@ const MOCK_RESPONSE = {
   newMission: null,
 };
 
+type HistoryMessage = { role: 'user' | 'robot'; text: string }
+
 export async function POST(req: Request) {
-  const { message, context } = await req.json();
+  const { message, history, context } = await req.json();
 
   if (!process.env.GEMINI_API_KEY) {
     return Response.json(MOCK_RESPONSE);
@@ -25,14 +27,27 @@ export async function POST(req: Request) {
 
   const basePrompt = await buildSystemPrompt();
   const stateContext = context
-    ? `\n\n## 現在の状態（参照用）\n- status: ${context.status}\n- lowPowerLock: ${context.lowPowerLock}`
+    ? `\n\n## 現在の状態（参照用）\n- status: ${context.status}\n- lowPowerLock: ${context.lowPowerLock}${context.mission ? `\n- mission: ${context.mission.title}` : ''}`
     : ''
   const systemPrompt = basePrompt + stateContext;
+
+  const historyContents = ((history ?? []) as HistoryMessage[]).map((m) => ({
+    role: m.role === 'user' ? 'user' as const : 'model' as const,
+    parts: [{ text: m.text }],
+  }))
+  const firstUserIdx = historyContents.findIndex((m) => m.role === 'user')
+  const trimmedHistory = firstUserIdx >= 0 ? historyContents.slice(firstUserIdx) : []
+  const contents = [
+    ...trimmedHistory,
+    { role: 'user' as const, parts: [{ text: message }] },
+  ]
+
+  console.log('[Gemini] contents:', JSON.stringify(contents, null, 2))
 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-flash-latest",
-      contents: message,
+      contents,
       config: {
         ...(systemPrompt && { systemInstruction: systemPrompt }),
         responseMimeType: "application/json",

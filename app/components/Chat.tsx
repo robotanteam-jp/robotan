@@ -10,14 +10,18 @@ const INITIAL_MESSAGES: Message[] = [
   },
 ]
 
+const MAX_HISTORY_MESSAGES = 20
+
 type Props = {
   state: RobotanState
+  mission?: { title: string; tags: string[] }
   onEffect?: (effect: RobotanEffect) => void
   logClassName?: string
   inputLocked?: boolean
+  slot?: React.ReactNode
 }
 
-export default function Chat({ state, onEffect, logClassName, inputLocked }: Props) {
+export default function Chat({ state, mission, onEffect, logClassName, inputLocked, slot }: Props) {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -39,6 +43,7 @@ export default function Chat({ state, onEffect, logClassName, inputLocked }: Pro
     const text = input.trim()
     if (!text || loading || inputLocked) return
 
+    const history = messages.slice(-MAX_HISTORY_MESSAGES)
     setInput('')
     setMessages((prev) => [...prev, { role: 'user', text }])
     setLoading(true)
@@ -49,7 +54,8 @@ export default function Chat({ state, onEffect, logClassName, inputLocked }: Pro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: text,
-          context: { status: state.status, lowPowerLock: state.lowPowerLock },
+          history,
+          context: { status: state.status, lowPowerLock: state.lowPowerLock, mission },
         }),
       })
       const data = await res.json()
@@ -121,6 +127,8 @@ export default function Chat({ state, onEffect, logClassName, inputLocked }: Pro
         )}
         <div ref={bottomRef} />
       </div>
+
+      {slot}
 
       <div className="flex gap-2">
         <input

@@ -1,5 +1,7 @@
 'use client'
 
+const ROBOTAN_VERSION = 'v0.2'
+
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import Chat from './components/Chat'
@@ -175,18 +177,18 @@ function StatusSection({ state }: { state: RobotanState }) {
 
 function MissionCard({ mission, missionCompleteFlash, padded }: { mission: Mission; missionCompleteFlash: boolean; padded?: boolean }) {
   return (
-    <div className={`rounded-xl border border-stone-200 bg-stone-50 space-y-1.5 ${padded ? 'p-3' : 'p-4'}`}>
-      <p className="text-xs text-stone-400 tracking-widest uppercase">MISSION</p>
+    <div className={`rounded-xl border border-stone-200 bg-stone-50 space-y-1.5 ${padded ? 'p-1.5' : 'p-2'}`}>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <p className="text-xs text-stone-400 tracking-widest uppercase shrink-0">MISSION</p>
+        {!missionCompleteFlash && mission.tags.map((t) => (
+          <span key={t} className="text-xs px-2.5 py-0.5 rounded-full bg-stone-200/70 text-stone-500">{t}</span>
+        ))}
+      </div>
       {missionCompleteFlash ? (
         <p className="text-sm font-bold tracking-widest text-amber-500">MISSION COMPLETE</p>
       ) : (
         <p className="text-sm text-stone-700 leading-relaxed">{mission.title}</p>
       )}
-      <div className="flex gap-1.5 flex-wrap pt-1">
-        {mission.tags.map((t) => (
-          <span key={t} className="text-xs px-2.5 py-0.5 rounded-full bg-stone-200/70 text-stone-500">{t}</span>
-        ))}
-      </div>
     </div>
   )
 }
@@ -295,7 +297,7 @@ export default function Home() {
       <div className="relative z-10 w-full max-w-md flex flex-col gap-6 lg:hidden">
 
         <div className="flex items-center justify-between text-xs text-stone-400 tracking-widest uppercase">
-          <span>ROBOTAN OS v0.1</span>
+          <span>ROBOTAN OS {ROBOTAN_VERSION}</span>
           <span className="flex flex-col items-end gap-0.5">
             <span className={`flex items-center gap-1.5 transition-colors duration-500 ${mobileMode.label}`}>
               <span className={`w-2 h-2 rounded-full transition-all duration-500 ${mobileMode.dot}`} />
@@ -305,21 +307,20 @@ export default function Home() {
           </span>
         </div>
 
-        <div className="flex flex-col items-center gap-2">
-          <RobotImage status={state.status} emotion={displayEmotion} zipperState={state.zipperState} className="w-48 drop-shadow-sm" rippleKey={rippleKey} />
-          <div className="text-center mt-1">
-            <h1 className="text-3xl font-bold tracking-tight text-stone-800">ROBOTAN</h1>
-            <p className="text-xs tracking-[0.25em] text-stone-400 uppercase mt-0.5">Protect the Henachoko.</p>
-            <p className="text-xs text-stone-400 mt-2 leading-relaxed">あなたは今日も内側にいてください。<br />外のことは全部、私が引き受けます。</p>
-          </div>
+        <div className="text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-stone-800">ROBOTAN</h1>
+          <p className="text-xs tracking-[0.25em] text-stone-400 uppercase mt-0.5">Protect the Henachoko.</p>
+          <p className="text-xs text-stone-400 mt-2 leading-relaxed">あなたは今日も内側にいてください。<br />外のことは全部、私が引き受けます。</p>
         </div>
 
-        <MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} />
         <StatusSection state={state} />
-        <Chat state={state} onEffect={handleEffect} inputLocked={missionCompleteFlash} />
+        <div className="flex flex-col items-center gap-3">
+          <RobotImage status={state.status} emotion={displayEmotion} zipperState={state.zipperState} className="w-48 drop-shadow-sm" rippleKey={rippleKey} />
+          <Chat state={state} onEffect={handleEffect} inputLocked={missionCompleteFlash} slot={<MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} />} mission={mission} />
+        </div>
 
         <p className="text-center text-xs text-stone-300 tracking-widest pb-2">
-          Robotan v0.1 — Powered by Henachoko Spirit
+          Robotan {ROBOTAN_VERSION} — Powered by Henachoko Spirit
         </p>
       </div>
 
@@ -328,7 +329,7 @@ export default function Home() {
 
         {/* left: robot + status */}
         <div className="flex flex-col items-center gap-2 shrink-0 w-[230px]">
-          <div className="text-xs text-stone-400 tracking-widest uppercase self-start">ROBOTAN OS v0.1</div>
+          <div className="text-xs text-stone-400 tracking-widest uppercase self-start">ROBOTAN OS {ROBOTAN_VERSION}</div>
           <RobotImage status={state.status} emotion={displayEmotion} zipperState={state.zipperState} className="mt-2 w-[230px] drop-shadow-md" rippleKey={rippleKey} />
           <ActiveBadge mode={state.mode} />
           <div className="w-full mt-2">
@@ -344,11 +345,10 @@ export default function Home() {
             <p className="text-xs text-stone-400 mt-2 leading-relaxed">あなたは今日も内側にいてください。<br />外のことは全部、私が引き受けます。</p>
           </div>
 
-          <MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} padded />
-          <Chat state={state} onEffect={handleEffect} logClassName="max-h-72" inputLocked={missionCompleteFlash} />
+          <Chat state={state} onEffect={handleEffect} logClassName="max-h-72" inputLocked={missionCompleteFlash} slot={<MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} padded />} mission={mission} />
 
           <p className="text-xs text-stone-300 tracking-widest">
-            Robotan v0.1 — Powered by Henachoko Spirit
+            Robotan {ROBOTAN_VERSION} — Powered by Henachoko Spirit
           </p>
         </div>
       </div>

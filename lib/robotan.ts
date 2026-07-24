@@ -31,12 +31,13 @@ async function readPromptFile(filename: string): Promise<string | null> {
 const SPEC_FILES = [
   "SKILL.md",
   "SAFETY.md",
+  "DIALOGUE.md",
   "POWER-FUEL.md",
   "STATUS.md",
-  "MISSION.md",
+  "MODE.md",
   "EXPRESSION.md",
   "ZIPPER.md",
-  "MODE.md",
+  "MISSION.md",
   "examples.md",
 ];
 

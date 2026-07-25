@@ -10,6 +10,8 @@ Robotan's Birthday 🎉
 
 ## 2026-07-23
 
+v0.2 Vercel
+
 - First public release on Vercel
 - Added Gemini AI integration
 - Added demo mode
@@ -18,3 +20,15 @@ Robotan's Birthday 🎉
 - Improved Robotan's personality
 
 Robotan could walk beside anyone, anywhere.🎉
+
+## 2026-07-24
+
+v0.3 Buddy
+
+- Conversation history support
+- Smarter context-aware missions
+- Improved PROTECT mode behavior
+- Refactored system prompt architecture
+- Public demo deployed on Vercel
+
+Robotan became a true companion.🎉

@@ -49,3 +49,6 @@ next-env.d.ts
 
 # Snapshots
 snapshots/
+
+# Feedback (local only — migrate to DB in future)
+/feedback/*.json

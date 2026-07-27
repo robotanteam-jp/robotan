@@ -75,7 +75,17 @@ export default function FeedbackPanel({ messages, state, mission, version, onDis
 
   return (
     <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 space-y-3">
-      <p className="text-xs text-stone-500 tracking-widest">🤖 ロボタンを育てるでござるか？</p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-stone-500 tracking-widest">🤖 ロボタンを育てるでござるか？</p>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="text-xs text-stone-300 hover:text-stone-400 transition-colors"
+          aria-label="閉じる"
+        >
+          ✕
+        </button>
+      </div>
 
       <div className="flex gap-2 flex-wrap">
         {RATINGS.map(({ key, label }) => (

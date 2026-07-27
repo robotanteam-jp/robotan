@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { type Message, type RobotanEffect, type RobotanEmotion, type RobotanMode, type RobotanState, type RobotanStatus, type ZipperState } from '../lib/robotan'
+import { debugTurn } from '../lib/debug'
 
 const INITIAL_MESSAGES: Message[] = [
   {
@@ -49,6 +50,8 @@ export default function Chat({ state, mission, onEffect, logClassName, inputLock
     const text = input.trim()
     if (!text || loading || inputLocked) return
 
+    const beforeState = { ...state }
+    const beforeMission = mission
     const history = messages.slice(-MAX_HISTORY_MESSAGES)
     setInput('')
     setMessages((prev) => [...prev, { role: 'user', text }])
@@ -92,6 +95,28 @@ export default function Chat({ state, mission, onEffect, logClassName, inputLock
         missionCompleted: data.missionCompleted === true,
         ...(data.newMission && { newMission: data.newMission }),
       }
+      debugTurn({
+        userMessage: text,
+        before: {
+          status:       beforeState.status,
+          mode:         beforeState.mode,
+          power:        beforeState.power,
+          fuel:         beforeState.fuel,
+          missionTitle: beforeMission?.title,
+          emotion:      beforeState.emotion,
+          zipperState:  beforeState.zipperState,
+        },
+        llm: {
+          status:      data.status,
+          mode:        data.mode,
+          powerChange: data.powerChange,
+          fuelChange:  data.fuelChange,
+          newMission:  data.newMission,
+          emotion:     data.emotion,
+          zipperState: data.zipperState,
+        },
+        reply: replyText,
+      })
       setMessages((prev) => [...prev, { role: 'robot', text: effect.reply }])
       onEffect?.(effect)
     } catch {

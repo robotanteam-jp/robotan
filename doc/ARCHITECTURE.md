@@ -26,6 +26,7 @@ Robotan System Prompt
 - React
 - TypeScript
 - Tailwind CSS
+- react-markdown
 
 Responsible for:
 
@@ -34,12 +35,14 @@ Responsible for:
 - Robot animation
 - Status display
 - Mission display
+- Guide display (MarkdownViewer)
+- Welcome card (first visit only)
 
 ---
 
 ## Backend
 
-API Route
+API Routes
 
 /api/chat
 
@@ -50,6 +53,21 @@ Responsibilities:
 - Send request to Gemini
 - Parse response
 - Return Robotan response
+
+/api/guide
+
+Responsibilities:
+
+- Receive doc name as query param (`?doc=GETTING_STARTED`)
+- Read Markdown file from `doc/` directory
+- Return content as JSON
+
+/api/feedback
+
+Responsibilities:
+
+- Receive feedback payload (rating, comment, optional conversation)
+- Save to `feedback/` as JSON (development only)
 
 ---
 
@@ -93,6 +111,17 @@ Contains:
 - Expressions
 - Front / Back
 - Zipper variations
+
+doc/
+
+Contains Markdown files served via `/api/guide`.
+
+- GETTING_STARTED.md — in-app guide for new users
+- ARCHITECTURE.md — this document
+- (other spec files)
+
+Updating a `.md` file in `doc/` is reflected in the app immediately
+without any UI changes.
 
 ---
 

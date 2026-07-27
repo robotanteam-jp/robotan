@@ -32,3 +32,16 @@ v0.3 Buddy
 - Public demo deployed on Vercel
 
 Robotan became a true companion.🎉
+
+## 2026-07-27
+
+v0.3
+
+- Added debug mode (development console logging per turn)
+- Added feedback UI (rating, comment, optional conversation log)
+- Added in-app guide viewer (📖 button, GETTING_STARTED.md)
+- Added welcome card for first-time users
+- LAN development support
+
+Robotan learned to introduce itself.🎉
+

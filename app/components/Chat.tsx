@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { type Message, type RobotanEffect, type RobotanEmotion, type RobotanMode, type RobotanState, type RobotanStatus, type ZipperState, ROBOTAN_VERSION } from '../lib/robotan'
 import { debugTurn } from '../lib/debug'
 import FeedbackPanel from './FeedbackPanel'
+import WelcomeCard from './WelcomeCard'
 
 const INITIAL_MESSAGES: Message[] = [
   {
@@ -24,9 +25,10 @@ type Props = {
   logClassName?: string
   inputLocked?: boolean
   slot?: React.ReactNode
+  onOpenGuide?: () => void
 }
 
-export default function Chat({ state, mission, onEffect, logClassName, inputLocked, slot }: Props) {
+export default function Chat({ state, mission, onEffect, logClassName, inputLocked, slot, onOpenGuide }: Props) {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES)
   const [hasInput, setHasInput] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -146,8 +148,14 @@ export default function Chat({ state, mission, onEffect, logClassName, inputLock
     }
   }
 
+  const hasUserMessages = messages.some((m) => m.role === 'user')
+
   return (
     <div className="flex flex-col gap-3">
+      {!hasUserMessages && onOpenGuide && (
+        <WelcomeCard onOpen={onOpenGuide} />
+      )}
+
       <div
         className={`rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm space-y-2 overflow-y-auto overscroll-contain ${logClassName ?? 'max-h-44'}`}
       >

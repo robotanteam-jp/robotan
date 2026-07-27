@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import Chat from './components/Chat'
+import MarkdownViewer from './components/MarkdownViewer'
 import { EMOTION_IMAGE, INITIAL_MISSION, INITIAL_STATE, ROBOTAN_VERSION, type Mission, type RobotanEffect, type RobotanMode, type RobotanState, type RobotanStatus, type ZipperState } from './lib/robotan'
 
 type LampStyle = { dot: string; glow: string; anim: string }
@@ -203,6 +204,7 @@ export default function Home() {
   const [mission, setMission] = useState<Mission>(INITIAL_MISSION)
   const [missionCompleteFlash, setMissionCompleteFlash] = useState(false)
   const [rippleKey, setRippleKey] = useState(0)
+  const [guideOpen, setGuideOpen] = useState(false)
   const stateRef = useRef(state)
   stateRef.current = state
 
@@ -295,7 +297,17 @@ export default function Home() {
       <div className="relative z-10 w-full max-w-md flex flex-col gap-6 lg:hidden">
 
         <div className="flex items-center justify-between text-xs text-stone-400 tracking-widest uppercase">
-          <span>ROBOTAN OS {ROBOTAN_VERSION}</span>
+          <div className="flex items-center gap-2">
+            <span>ROBOTAN OS {ROBOTAN_VERSION}</span>
+            <button
+              type="button"
+              onClick={() => setGuideOpen(true)}
+              className="text-stone-400 hover:text-stone-600 transition-colors leading-none"
+              aria-label="はじめて使う"
+            >
+              📖
+            </button>
+          </div>
           <span className="flex flex-col items-end gap-0.5">
             <span className={`flex items-center gap-1.5 transition-colors duration-500 ${mobileMode.label}`}>
               <span className={`w-2 h-2 rounded-full transition-all duration-500 ${mobileMode.dot}`} />
@@ -314,7 +326,7 @@ export default function Home() {
         <StatusSection state={state} />
         <div className="flex flex-col items-center gap-3">
           <RobotImage status={state.status} emotion={displayEmotion} zipperState={state.zipperState} className="w-48 drop-shadow-sm" rippleKey={rippleKey} />
-          <Chat state={state} onEffect={handleEffect} inputLocked={missionCompleteFlash} slot={<MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} />} mission={mission} />
+          <Chat state={state} onEffect={handleEffect} inputLocked={missionCompleteFlash} slot={<MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} />} mission={mission} onOpenGuide={() => setGuideOpen(true)} />
         </div>
 
         <p className="text-center text-xs text-stone-300 tracking-widest pb-2">
@@ -327,7 +339,17 @@ export default function Home() {
 
         {/* left: robot + status */}
         <div className="flex flex-col items-center gap-2 shrink-0 w-[230px]">
-          <div className="text-xs text-stone-400 tracking-widest uppercase self-start">ROBOTAN OS {ROBOTAN_VERSION}</div>
+          <div className="flex items-center gap-2 self-start">
+            <div className="text-xs text-stone-400 tracking-widest uppercase">ROBOTAN OS {ROBOTAN_VERSION}</div>
+            <button
+              type="button"
+              onClick={() => setGuideOpen(true)}
+              className="text-stone-400 hover:text-stone-600 transition-colors text-xs leading-none"
+              aria-label="はじめて使う"
+            >
+              📖
+            </button>
+          </div>
           <RobotImage status={state.status} emotion={displayEmotion} zipperState={state.zipperState} className="mt-2 w-[230px] drop-shadow-md" rippleKey={rippleKey} />
           <ActiveBadge mode={state.mode} />
           <div className="w-full mt-2">
@@ -343,7 +365,7 @@ export default function Home() {
             <p className="text-xs text-stone-400 mt-2 leading-relaxed">あなたは今日も内側にいてください。<br />外のことは全部、私が引き受けます。</p>
           </div>
 
-          <Chat state={state} onEffect={handleEffect} logClassName="max-h-72" inputLocked={missionCompleteFlash} slot={<MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} padded />} mission={mission} />
+          <Chat state={state} onEffect={handleEffect} logClassName="max-h-72" inputLocked={missionCompleteFlash} slot={<MissionCard mission={mission} missionCompleteFlash={missionCompleteFlash} padded />} mission={mission} onOpenGuide={() => setGuideOpen(true)} />
 
           <p className="text-xs text-stone-300 tracking-widest">
             Robotan {ROBOTAN_VERSION} — Powered by Henachoko Spirit
@@ -351,6 +373,9 @@ export default function Home() {
         </div>
       </div>
 
+      {guideOpen && (
+        <MarkdownViewer doc="GETTING_STARTED" onClose={() => setGuideOpen(false)} />
+      )}
     </div>
   )
 }

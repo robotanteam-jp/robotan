@@ -199,6 +199,14 @@ robotan/
 └── LICENSE-CONTENT
 ```
 
+## Documentation
+
+```
+robotan/docs/
+├── GETTING_STARTED.md - How to use Robotan
+└── ARCHITECTURE.md
+```
+
 ---
 
 # 🚧 Roadmap

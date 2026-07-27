@@ -63,6 +63,8 @@ export const INITIAL_MISSION: Mission = {
   tags: ['見守り', '待機', '会話'],
 }
 
+export const ROBOTAN_VERSION = 'v0.2'
+
 export const INITIAL_FUEL = 62
 export const INITIAL_POWER = 87
 export const INITIAL_STATE: RobotanState = {

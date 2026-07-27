@@ -1,11 +1,9 @@
 'use client'
 
-const ROBOTAN_VERSION = 'v0.2'
-
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import Chat from './components/Chat'
-import { EMOTION_IMAGE, INITIAL_MISSION, INITIAL_STATE, type Mission, type RobotanEffect, type RobotanMode, type RobotanState, type RobotanStatus, type ZipperState } from './lib/robotan'
+import { EMOTION_IMAGE, INITIAL_MISSION, INITIAL_STATE, ROBOTAN_VERSION, type Mission, type RobotanEffect, type RobotanMode, type RobotanState, type RobotanStatus, type ZipperState } from './lib/robotan'
 
 type LampStyle = { dot: string; glow: string; anim: string }
 

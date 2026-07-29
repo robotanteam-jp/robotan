@@ -13,7 +13,7 @@ PASS
 
 ## Related Issue
 
-#
+#64 https://github.com/robotanteam-jp/robotan/issues/64
 
 ## Log
 

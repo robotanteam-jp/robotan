@@ -182,8 +182,10 @@ Robotan（ロボタン）は、
 robotan/
 ├── README.md
 ├── ーーーーーーーここから
+├── PHILOSOPHY.md
 ├── SKILL.md
 ├── SAFETY.md
+├── SPRING.md
 ├── DIALOGUE.md
 ├── POWER-FUEL.md
 ├── STATUS.md
@@ -193,7 +195,6 @@ robotan/
 ├── MISSION.md
 ├── examples.md
 ├── ーーーーーーーここまでsystem promptに反映
-├── SPRING.md
 ├── ROBOTAN-IMAGE.md
 ├── LICENSE-CODE
 └── LICENSE-CONTENT
@@ -229,10 +230,18 @@ Robotan is no longer a mock chat.
 From this day, Robotan became a real AI companion.
 
 ### 2026-07-23
+
 🌍 Robotan took its first step into the world.
 
 Robotan was deployed to Vercel and became available on the public web.
 From this day, anyone could meet Robotan through a browser.
+
+### 2026-07-29
+
+🗝️ Robotan learned to protect even in emergencies.
+
+Robotan can now switch to its Emergency Spring Mode when safety comes first.
+From this day, Robotan's mission remains the same—protect the Henachoko, no matter what happens.
 
 ---
 

@@ -45,3 +45,15 @@ v0.3
 
 Robotan learned to introduce itself.🎉
 
+## 2026-07-29
+
+v0.4 Zenmai
+
+- Added PHILOSOPHY.md — Robotan's core purpose: protecting life and heart
+- Updated SPRING.md — Emergency mode (ゼンマイ) for disasters and accidents
+- Clarified Safety Mode vs. Spring Mode branching (internal crisis vs. physical danger)
+- Dynamic SPRING status display (STANDBY / EMERGENCY)
+- Added springMode to RobotanState and AI response handling
+
+Robotan learned to protect even in emergencies.🎉
+

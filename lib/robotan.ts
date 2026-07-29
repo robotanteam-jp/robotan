@@ -32,6 +32,7 @@ const SPEC_FILES = [
   "PHILOSOPHY.md",
   "SKILL.md",
   "SAFETY.md",
+  "SPRING.md",
   "DIALOGUE.md",
   "POWER-FUEL.md",
   "STATUS.md",

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { type Message, type RobotanEffect, type RobotanEmotion, type RobotanMode, type RobotanState, type RobotanStatus, type ZipperState, ROBOTAN_VERSION } from '../lib/robotan'
+import { type Message, type RobotanEffect, type RobotanEmotion, type RobotanMode, type RobotanState, type RobotanStatus, type SpringMode, type ZipperState, ROBOTAN_VERSION } from '../lib/robotan'
 import { debugTurn } from '../lib/debug'
 import FeedbackPanel from './FeedbackPanel'
 import WelcomeCard from './WelcomeCard'
@@ -104,11 +104,13 @@ export default function Chat({ state, mission, onEffect, logClassName, inputLock
       const zipperState: ZipperState = !res.ok
         ? 'CLOSED'
         : VALID_ZIPPER.includes(data.zipperState) ? data.zipperState : (state.zipperState ?? 'CLOSED')
+      const VALID_SPRING: SpringMode[] = ['STANDBY', 'EMERGENCY']
+      const springMode: SpringMode | undefined = VALID_SPRING.includes(data.springMode) ? data.springMode : undefined
       const effect: RobotanEffect = {
         reply: replyText,
         ...(status && { status }),
         ...(lowPowerLock !== undefined && { lowPowerLock }),
-        ...((mode || emotion) && { stateDelta: { ...(mode && { mode }), ...(emotion && { emotion }) } }),
+        ...((mode || emotion || springMode) && { stateDelta: { ...(mode && { mode }), ...(emotion && { emotion }), ...(springMode && { springMode }) } }),
         ...(typeof data.powerChange === 'number' && { powerChange: data.powerChange }),
         ...(typeof data.fuelChange  === 'number' && { fuelChange:  data.fuelChange  }),
         zipperState,

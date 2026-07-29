@@ -14,6 +14,7 @@ Respond ONLY with a JSON object in this exact format:
   "powerChange": <整数。変化なしは 0>,
   "fuelChange": <整数。変化なしは 0>,
   "zipperState": "<CLOSED | HALF_OPEN | FULL_OPEN>",
+  "springMode": "<STANDBY | EMERGENCY>",
   "missionCompleted": <現在のMissionが完了したなら true, それ以外は false>,
   "newMission": <{ "title": "...", "tags": ["...", "...", "..."] } または null>
 }

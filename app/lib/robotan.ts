@@ -29,6 +29,8 @@ export const EMOTION_IMAGE: Record<RobotanEmotion, string> = {
 
 export type ZipperState = 'CLOSED' | 'HALF_OPEN' | 'FULL_OPEN'
 
+export type SpringMode = 'STANDBY' | 'EMERGENCY'
+
 export type Mission = {
   title: string
   completed: boolean
@@ -43,6 +45,7 @@ export type RobotanState = {
   mode: RobotanMode
   emotion: RobotanEmotion
   zipperState: ZipperState
+  springMode: SpringMode
 }
 
 export type RobotanEffect = {
@@ -75,6 +78,7 @@ export const INITIAL_STATE: RobotanState = {
   mode: 'STANDBY',
   emotion: 'NORMAL',
   zipperState: 'CLOSED',
+  springMode: 'STANDBY',
 }
 
 // Replace this function with an LLM call when ready.

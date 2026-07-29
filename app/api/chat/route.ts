@@ -10,6 +10,7 @@ const MOCK_RESPONSE = {
   powerChange: 0,
   fuelChange: 0,
   zipperState: "CLOSED",
+  springMode: "STANDBY",
   missionCompleted: false,
   newMission: null,
 };
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
     const raw = response.text ?? "{}";
     const parsed = JSON.parse(raw) as {
       reply?: string; status?: string; lowPowerLock?: boolean; mode?: string; emotion?: string;
-      powerChange?: number; fuelChange?: number; zipperState?: string;
+      powerChange?: number; fuelChange?: number; zipperState?: string; springMode?: string;
       missionCompleted?: boolean; newMission?: { title: string; tags: string[] } | null;
     };
 
@@ -68,6 +69,7 @@ export async function POST(req: Request) {
       powerChange:      typeof parsed.powerChange === 'number' ? parsed.powerChange : 0,
       fuelChange:       typeof parsed.fuelChange  === 'number' ? parsed.fuelChange  : 0,
       zipperState:      parsed.zipperState ?? null,
+      springMode:       parsed.springMode ?? null,
       missionCompleted: typeof parsed.missionCompleted === 'boolean' ? parsed.missionCompleted : false,
       newMission:       parsed.newMission ?? null,
     });

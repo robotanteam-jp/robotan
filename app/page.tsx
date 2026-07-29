@@ -168,7 +168,9 @@ function StatusSection({ state }: { state: RobotanState }) {
 
       <div className="flex justify-between text-xs text-stone-400 tracking-widest">
         <span>SPRING</span>
-        <span className="text-amber-500 font-semibold tracking-widest">READY</span>
+        <span className={`font-semibold tracking-widest ${state.springMode === 'EMERGENCY' ? 'text-orange-500' : 'text-stone-400'}`}>
+          {state.springMode}
+        </span>
       </div>
     </div>
   )

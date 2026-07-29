@@ -29,6 +29,7 @@ async function readPromptFile(filename: string): Promise<string | null> {
 }
 
 const SPEC_FILES = [
+  "PHILOSOPHY.md",
   "SKILL.md",
   "SAFETY.md",
   "DIALOGUE.md",

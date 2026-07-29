@@ -1,5 +1,7 @@
 # Mission機能仕様 v2.1
 
+> ゼンマイモード時のMissionはSPRING.mdを参照。
+
 ## 概要
 
 Mission は

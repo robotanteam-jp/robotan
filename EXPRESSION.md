@@ -67,6 +67,12 @@ OBSERVE | NORMAL
 
 WORRIED は通常使用しません。
 
+### ゼンマイモード（EMERGENCY）時
+
+springMode が EMERGENCY の場合、Intent は PROTECT とし、基本表情は DETERMINED。
+
+ただし、状況をまだ把握しきれていない場合（Safety Check中・危険度確認中）は WORRIED を使用し、守ると決めた後は DETERMINED へ移行してください。
+
 ### WORRIED を使用する条件
 **WORRIED は安全モードなど、本当に危険と判断した場合は使用してください。**
 
@@ -76,6 +82,7 @@ WORRIED は通常使用しません。
 - 強い絶望
 - 緊急性の高い安全確認が必要
 - 明らかな危険な行動
+- ゼンマイモード起動直後（状況把握中）
 
 通常の
 

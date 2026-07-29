@@ -33,6 +33,7 @@ export default function Chat({ state, mission, onEffect, logClassName, inputLock
   const [hasInput, setHasInput] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
+  const [welcomeDismissed, setWelcomeDismissed] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -152,8 +153,8 @@ export default function Chat({ state, mission, onEffect, logClassName, inputLock
 
   return (
     <div className="flex flex-col gap-3">
-      {!hasUserMessages && onOpenGuide && (
-        <WelcomeCard onOpen={onOpenGuide} />
+      {!hasUserMessages && !welcomeDismissed && onOpenGuide && (
+        <WelcomeCard onOpen={onOpenGuide} onDismiss={() => setWelcomeDismissed(true)} />
       )}
 
       <div

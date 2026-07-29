@@ -2,11 +2,22 @@
 
 type Props = {
   onOpen: () => void
+  onDismiss?: () => void
 }
 
-export default function WelcomeCard({ onOpen }: Props) {
+export default function WelcomeCard({ onOpen, onDismiss }: Props) {
   return (
-    <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 space-y-3 text-center">
+    <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 space-y-3 text-center relative">
+      {onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="absolute top-3 right-3 text-stone-300 hover:text-stone-400 transition-colors leading-none"
+          aria-label="閉じる"
+        >
+          ✕
+        </button>
+      )}
       <p className="text-xs text-stone-400 tracking-widest">🤖 はじめてのロボタン</p>
       <div className="space-y-1 text-sm text-stone-600 leading-relaxed">
         <p>ロボタンは</p>

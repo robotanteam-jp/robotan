@@ -140,7 +140,7 @@ export default function Chat({ state, mission, onEffect, logClassName, inputLock
         reply: replyText,
       })
       setMessages((prev) => [...prev, { role: 'robot', text: effect.reply }])
-      if (triggerFeedback) setShowFeedback(true)
+      if (triggerFeedback && !state.lowPowerLock && state.springMode !== 'EMERGENCY') setShowFeedback(true)
       onEffect?.(effect)
     } catch {
       const errorText = '通信エラーが発生したでござる。'
